@@ -1,0 +1,7 @@
+{
+    "target": "/home/vagrant/rust/thecho",
+    "suites": [
+        { "number": "1", "name": "Basic", "points": 10.0, "filter": "thecho" },
+        { "number": "2", "name": "Advanced", "points": 20.0, "filter": "thecho" }
+    ]
+}
