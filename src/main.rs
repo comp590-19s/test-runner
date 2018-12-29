@@ -87,11 +87,15 @@ impl Test {
         Test {
             number: self.number.clone(),
             name: self.name.clone(),
-            score: self.score * factor,
-            max_score: self.max_score * factor,
+            score: round(self.score * factor),
+            max_score: round(self.max_score * factor),
             output: self.output.clone(),
         }
     }
+}
+
+fn round(input: f64) -> f64 {
+    (input * 100.0).round() / 100.0
 }
 
 #[derive(Debug,Serialize)]
@@ -167,18 +171,6 @@ fn output_to_json(output: &Output) -> Vec<serde_json::Value> {
     json
 }
 
-/*
- * Object({"event": String("failed"), "name": String("thecho::call_with_multiple_args"), "stdout":
- * String("thread \'thecho::call_with_multiple_args\' panicked at \'Case: thecho hello world\',
- * tests/thecho.rs:36:13\nnote: Run with `RUST_BACKTRACE=1` for a backtrace.\n"), "type":
- * String("test")})
- * ===
- * Object({"event": String("ok"), "name": String("thecho::call_with_single_arg"), "type":
- * String("test")})
- * ===
- * Object({"event": String("ok"), "name": String("thecho::call_without_args"), "type":
- * String("test")})
- */
 fn filter_test_output(line: &serde_json::Value, number: &str, prefix: &str) -> Option<Test> {
     if line["type"] == "test" && line["event"] != "started" {
         // noop
