@@ -181,7 +181,37 @@ fn filter_test_output(line: &serde_json::Value, number: &str, prefix: &str) -> O
     let passed = line["event"] == "ok";
     let score = if passed { 1.0 } else { 0.0 };
     let name = prefix.to_owned() + " - " + &line["name"].to_string().replace("\"", "");
-    let output = if passed { String::from("") } else { line["stdout"].to_string() };
-
+    let output = if passed { String::from("") } else { unescape(&line["stdout"].to_string()) };
     Some(Test::new(number.to_string(), name, score, output))
+}
+
+/*
+ * The following function is sourced from:
+ * http://softwaremaniacs.org/blog/2015/05/28/ijson-in-rust-unescape/en/
+ */
+fn unescape(s: &str) -> String {
+    let mut result = String::with_capacity(s.len());
+    let mut chars = s.chars();
+    while let Some(ch) = chars.next() {
+        result.push(
+            if ch != '\\' {
+                ch
+            } else {
+                match chars.next() {
+                    Some('u') => {
+                        let value = chars.by_ref().take(4).fold(0, |acc, c| acc * 16 + c.to_digit(16).unwrap());
+                        std::char::from_u32(value).unwrap()
+                    }
+                    Some('b') => '\x08',
+                    Some('f') => '\x0c',
+                    Some('n') => '\n',
+                    Some('r') => '\r',
+                    Some('t') => '\t',
+                    Some(ch) => ch,
+                    _ => panic!("Malformed escape"),
+                }
+            }
+            )
+    }
+    result
 }
